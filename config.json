@@ -1,0 +1,100 @@
+{
+  "dns": {
+    "servers": [
+      {
+        "tag": "one.one.one.one",
+        "address": "tls://1.1.1.1"
+      },
+      {
+        "tag": "local",
+        "address": "223.5.5.5",
+        "detour": "direct"
+      }
+    ],
+    "rules": [
+      {
+        "outbound": "any",
+        "server": "local"
+      }
+    ],
+    "strategy": "ipv4_only"
+  },
+  "inbounds": [
+    {
+        "listen": "127.0.0.1",
+        "listen_port": 6450,
+        "override_address": "8.8.8.8",
+        "override_port": 53,
+        "tag": "dns-in",
+        "type": "direct"
+    },
+    {
+      "type": "tun",
+      "inet4_address": "172.19.0.1/30",
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "system",
+      "mtu": 9000,
+      "sniff": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "socks",
+      "tag": "socks-out",
+      "server": "127.0.0.1",
+      "server_port": 8086,
+      "version": "5"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "port": [
+                22,
+                3389
+        ],
+        "outbound": "direct"
+      },
+      {
+        "process_name": [
+          "warp-plus"
+          ],
+        "outbound": "direct"
+      },
+      {
+        "geoip": [
+          "private"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geoip-ir",
+        "outbound": "direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "geoip-ir",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ir.srs",
+        "download_detour": "direct"
+      },
+    ],
+    "final": "socks-out",
+    "auto_detect_interface": true
+  }
+}
