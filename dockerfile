@@ -24,8 +24,8 @@ rm "README.md" "LICENSE" "warp-plus_linux-amd64.zip" && \
 mv warp-plus /usr/bin/
 
 # Copy Singbox and supervisord.conf
-COPY singwarp/singwarp.conf /etc/supervisor/conf.d/singwarp.conf
-COPY singwarp/config.json /root/config.json
+COPY ./singwarp.conf /etc/supervisor/conf.d/singwarp.conf
+COPY ./config.json /root/config.json
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "-n"]
